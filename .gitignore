@@ -1,6 +1,12 @@
 # Prerequisites
 *.d
 
+RayTraci.41305811/
+x64/
+Debug/
+.idea/
+outputFile.ppm
+
 # Compiled Object files
 *.slo
 *.lo
