@@ -1,5 +1,7 @@
 #include <iostream>
 #include <fstream>
+#include "Vector3.h"
+#include "Color.h"
 
 using namespace std;
 int main()
@@ -14,21 +16,10 @@ int main()
         clog << "Image Progress " << ((float)j / (float)image_height * 100) << endl;
         
         for (int i = 0; i < image_width; i++) {
-            auto r = double(i) / (image_width-1);
-            auto g = double(j) / (image_height-1);
-            auto b = 0.0;
-
-            int ir = int(255.999 * r);
-            int ig = int(255.999 * g);
-            int ib = int(255.999 * b);
-            
-            outputFile << ir << ' ' << ig << ' ' << ib;
-            outputFile << endl;
+            Color pixelColor = Color(double(i) / (image_width-1), double(j) / (image_height-1), 0.0);
+            WriteColor(outputFile ,pixelColor);
         }
     }
     clog << "Image Progress Complete" << endl;
     outputFile.close();
-    
-
-    
 }
