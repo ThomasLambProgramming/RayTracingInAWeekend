@@ -28,4 +28,7 @@ int main()
     }
     clog << "Image Progress Complete" << endl;
     outputFile.close();
+    
+
+    
 }
