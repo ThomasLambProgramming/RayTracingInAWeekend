@@ -154,11 +154,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BaseClasses\Ray.cpp" />
     <ClCompile Include="RayTracingWeekend.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Color.h" />
-    <ClInclude Include="Vector3.h" />
+    <ClInclude Include="BaseClasses\Color.h" />
+    <ClInclude Include="BaseClasses\Ray.h" />
+    <ClInclude Include="BaseClasses\Vector3.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
