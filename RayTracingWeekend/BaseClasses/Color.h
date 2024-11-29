@@ -1,8 +1,8 @@
 ﻿#ifndef COLOR_H
 #define COLOR_H
 
+#include "RayTraceWeekendConstants.h"
 #include "Vector3.h"
-#include <iostream>
 
 using Color = Vector3;
 

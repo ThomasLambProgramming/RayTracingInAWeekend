@@ -1,39 +1,21 @@
-#include <iostream>
 #include <fstream>
-#include "BaseClasses/Vector3.h"
-#include "BaseClasses/Color.h"
-#include "BaseClasses/Ray.h"
+#include "BaseClasses/RayTraceWeekendConstants.h"
+#include "BaseClasses/Hittable.h"
+#include "BaseClasses/HittableList.h"
+#include "BaseClasses/Sphere.h"
 
 using namespace std;
 
-double RaySphereCollisionCheck(const Point3& Center, double Radius, const Ray& ray)
+Color RayColor(const Ray& ray, const Hittable& world)
 {
-    //I do not fully understand the math behind this but the following is to find how far along a ray (if at all) is the sphere intersecting with it.
-    Vector3 oc = Center - ray.Origin();
-    double a = ray.Direction().SquaredLength();
-    double h = DotProduct(ray.Direction(), oc);
-    double c = oc.SquaredLength() - (Radius * Radius);
-    
-    double discriminant = (h * h) -  (a * c);
-    if (discriminant < 0)
-        return -1.0;
-
-    return (h - std::sqrt(discriminant)) / a; 
-}
-
-Color RayColor(const Ray& r)
-{
-    double t = RaySphereCollisionCheck(Point3(0,0,-1), 0.5, r);
-    if (t > 0.0)
+    HitRecord record;
+    if (world.Hit(ray, Interval(0, infinity), record))
     {
-        //Position of collision with ray and sphere - sphere position to get normal of sphere.
-        Vector3 normal = UnitVector(r.PositionAt(t) - Vector3(0,0,-1));
-
-        //Return normal put back into range of [0,1]
-        return 0.5 * Color(normal.x() + 1, normal.y() + 1, normal.z() + 1);
+        return 0.5 * (record.normal + Color(1,1,1));
     }
-    
-    Vector3 direction = UnitVector(r.Direction());
+
+    //Background gradient from white to blue
+    Vector3 direction = UnitVector(ray.Direction());
     double a = 0.5 * (direction.y() + 1.0);
     return (1.0 - a) * Color(1.0,1.0,1.0) + a * Color(0.5,0.7,1.0);
     //When logging direction.y is -0.7 -> 0.57 in range so a's range is 0.15->0.785
@@ -66,6 +48,11 @@ int main()
     //We inset by half a pixel on either side so each pixel position is the middle of the pixel it is meant to ray from.
     Vector3 pixel00Location = viewportUpperLeft + 0.5 * (pixelDeltaU + pixelDeltaV);
 
+    HittableList world;
+    world.AddObject(make_shared<Sphere>(Point3(0,0,-1), 0.5));
+    world.AddObject(make_shared<Sphere>(Point3(0,-100.5,-1), 100));
+
+    
     ofstream outputFile("outputFile.ppm");
     outputFile << "P3" << '\n' << imageWidth << ' ' << imageHeight << "\n" << "255" << "\n";
     cout << "Started Image Processing" << "\n";
@@ -81,7 +68,7 @@ int main()
 
             //Previous green to red uv basic.
             //Color(double(i) / (imageWidth-1), double(j) / (imageHeight-1), 0.0);
-            Color pixelColor = RayColor(ray);
+            Color pixelColor = RayColor(ray, world);
             WriteColor(outputFile ,pixelColor);
         }
     }
