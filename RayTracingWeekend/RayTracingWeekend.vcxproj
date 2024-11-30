@@ -157,6 +157,7 @@
     <ClCompile Include="RayTracingWeekend.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BaseClasses\Camera.h" />
     <ClInclude Include="BaseClasses\Color.h" />
     <ClInclude Include="BaseClasses\Hittable.h" />
     <ClInclude Include="BaseClasses\HittableList.h" />
