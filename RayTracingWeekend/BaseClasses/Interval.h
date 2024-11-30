@@ -15,6 +15,14 @@ public:
     {
         return max - min;
     }
+    double clamp(double x) const
+    {
+        if (x < min)
+            return min;
+        if (x > max)
+            return max;
+        return x;
+    }
 
     bool Contains(double x) const
     {
