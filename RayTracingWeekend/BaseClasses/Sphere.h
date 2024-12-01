@@ -11,7 +11,6 @@ public:
     
     bool Hit(const Ray& ray, Interval rayT, HitRecord& record) const override
     {
-        //I do not fully understand the math behind this but the following is to find how far along a ray (if at all) is the sphere intersecting with it.
         Vector3 oc = center - ray.Origin();
         double a = ray.Direction().SquaredLength();
         double h = DotProduct(ray.Direction(), oc);
@@ -21,7 +20,6 @@ public:
         if (discriminant < 0)
             return false;
 
-        
         double sqrtd = std::sqrt(discriminant);
         //Range the nearest root that lies in the acceptable range.
         double root = (h - sqrtd) / a;

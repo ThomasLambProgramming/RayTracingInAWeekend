@@ -9,6 +9,7 @@ public:
     double p[3];
     Vector3() : p{0,0,0} {}
     Vector3(double x, double y, double z) : p{x,y,z} {}
+    Vector3(double x) : p{x,x,x} {}
 
     double x() const { return p[0]; }
     double y() const { return p[1]; }
@@ -39,6 +40,15 @@ public:
     
     double SquaredLength() const { return p[0] * p[0] + p[1] * p[1] +  p[2] * p[2]; }
     double Length() const {return std::sqrt(SquaredLength());}
+
+    static Vector3 Random()
+    {
+        return Vector3(RandomDouble(),RandomDouble(), RandomDouble());
+    }
+    static Vector3 Random(double min, double max)
+    {
+        return Vector3(RandomDouble(min,max), RandomDouble(min,max), RandomDouble(min,max));
+    }
 };
 
 //Didn't know alias's existed this is useful. (this is used for later to clarify what the data is being used for.)
@@ -92,6 +102,25 @@ inline Vector3 CrossProduct(const Vector3& lhs, const Vector3& rhs)
 inline Vector3 UnitVector(const Vector3& vec)
 {
     return vec / vec.Length();
+}
+inline Vector3 RandomUnitVector()
+{
+    while (true)
+    {
+        Vector3 point = Vector3::Random(-1,1);
+        double pointLength = point.SquaredLength();
+        //if the point is less than one but greater than a very small number (avoid float rounding errors causing a 0/infinity vector)
+        if (pointLength <= 1 && pointLength > 1e-160)
+            return point / sqrt(pointLength);
+    }
+}
+inline Vector3 RandomOnHemisphere(const Vector3& surfaceNormal)
+{
+    Vector3 newRandomVector = RandomUnitVector();
+    if (DotProduct(newRandomVector, surfaceNormal) > 0.0)
+        return newRandomVector;
+    else
+        return -newRandomVector;
 }
 
 #endif

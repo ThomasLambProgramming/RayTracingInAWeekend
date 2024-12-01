@@ -8,7 +8,8 @@ class Camera
 public:
     double aspectRatio = 1.0;  // Ratio of image width over height
     int imageWidth  = 100;  // Rendered image width in pixel count
-    int samplesPerPixel = 1; 
+    int samplesPerPixel = 1;
+    int maxLightBounces = 10;
     
     void Render(const Hittable& world)
     {
@@ -26,7 +27,7 @@ public:
                 for (int sample = 0; sample < samplesPerPixel; sample++)
                 {
                     Ray ray = GetRay(i, j);
-                    pixelColor += RayColor(ray, world);
+                    pixelColor += RayColor(ray, world, 0);
                 }
                 WriteColor(outputFile, pixelSamplesScale * pixelColor);
             }
@@ -87,12 +88,16 @@ private:
         return Vector3(RandomDouble() - 0.5, RandomDouble() -0.5, 0);
     }
     
-    Color RayColor(const Ray& ray, const Hittable& world) const
+    Color RayColor(const Ray& ray, const Hittable& world, int bounceDepth) const
     {
+        if (bounceDepth >= maxLightBounces)
+            return Color(0,0,0);
+        
         HitRecord record;
-        if (world.Hit(ray, Interval(0, infinity), record))
+        if (world.Hit(ray, Interval(0.001, infinity), record))
         {
-            return 0.5 * (record.normal + Color(1,1,1));
+            Vector3 bounceDirection = record.normal + RandomUnitVector();
+            return 0.5 * RayColor(Ray(record.point, bounceDirection), world, bounceDepth+1);
         }
 
         //Background gradient from white to blue
