@@ -38,7 +38,7 @@ private:
 class Metal : public Material 
 {
 public:
-    Metal (const Color& albedo, double fuzzAmount) : albedo(albedo), fuzz(fuzzAmount) {}
+    Metal(const Color& albedo, double fuzzAmount) : albedo(albedo), fuzz(fuzzAmount) {}
     bool Scatter(const Ray& rayIn, const HitRecord& record, Color& attenuation, Ray& scatteredRay) const override
     {
         Vector3 scatterDirection = Reflect(rayIn.Direction(), record.normal);
@@ -57,18 +57,37 @@ private:
 class Dielectric : public Material 
 {
 public:
-    Dielectric  (double refractionAmount) : refractionIndex(refractionAmount) {}
+    Dielectric(double refractionAmount) : refractionIndex(refractionAmount) {}
     bool Scatter(const Ray& rayIn, const HitRecord& record, Color& attenuation, Ray& scatteredRay) const override
     {
         attenuation = Color(1.0,1.0,1.0);
         double ri = record.isFrontFace ? (1.0/refractionIndex) : refractionIndex;
         Vector3 unitDirection = UnitVector(rayIn.Direction());
-        Vector3 refracted = Refract(unitDirection, record.normal, ri);
-        scatteredRay = Ray(record.point, refracted);
+
+        double cosTheta = std::fmin(DotProduct(-unitDirection, record.normal), 1.0);
+        double sinTheta = std::sqrt(1.0 - cosTheta * cosTheta);
+        bool cannotRefract = (ri * sinTheta) > 1.0;
+        Vector3 rayOutputDirection;
+        if (cannotRefract || Reflectance(cosTheta, ri) > RandomDouble())
+            rayOutputDirection = Reflect(unitDirection, record.normal);
+        else
+            rayOutputDirection = Refract(unitDirection, record.normal, ri);
+        
+        scatteredRay = Ray(record.point, rayOutputDirection);
         return true;
     }
 private:
     double refractionIndex;
+
+    //Glass has different reflectivity depending on the angle we look at it, the math is apparently horrible
+    //but this Schlick's approximation is accurate enough to achieve a similar result.
+    static double Reflectance(double cosine, double refractionIndex)
+    {
+        // Use Schlick's approximation for reflectance.
+        auto r0 = (1 - refractionIndex) / (1 + refractionIndex);
+        r0 = r0*r0;
+        return r0 + (1-r0)*std::pow((1 - cosine),5);
+    }
 };
 
 #endif
