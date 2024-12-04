@@ -162,6 +162,7 @@
     <ClInclude Include="BaseClasses\Hittable.h" />
     <ClInclude Include="BaseClasses\HittableList.h" />
     <ClInclude Include="BaseClasses\Interval.h" />
+    <ClInclude Include="BaseClasses\Material.h" />
     <ClInclude Include="BaseClasses\Ray.h" />
     <ClInclude Include="BaseClasses\RayTraceWeekendConstants.h" />
     <ClInclude Include="BaseClasses\Sphere.h" />

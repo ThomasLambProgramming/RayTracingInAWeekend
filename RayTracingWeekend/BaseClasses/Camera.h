@@ -3,6 +3,8 @@
 #include "Hittable.h"
 #include <fstream>
 
+#include "Material.h"
+
 class Camera
 {
 public:
@@ -96,11 +98,14 @@ private:
         HitRecord record;
         if (world.Hit(ray, Interval(0.001, infinity), record))
         {
-            Vector3 bounceDirection = record.normal + RandomUnitVector();
-            return 0.5 * RayColor(Ray(record.point, bounceDirection), world, bounceDepth+1);
+            Ray scatteredRay;
+            Color attenuation;
+            if (record.material->Scatter(ray, record, attenuation, scatteredRay))
+                return attenuation * RayColor(scatteredRay, world, bounceDepth+1);
+            return Color(0,0,0);
         }
 
-        //Background gradient from white to blue
+        //Background gradient from white to blue (this is the sky color)
         Vector3 direction = UnitVector(ray.Direction());
         double a = 0.5 * (direction.y() + 1.0);
         return (1.0 - a) * Color(1.0,1.0,1.0) + a * Color(0.5,0.7,1.0);

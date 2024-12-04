@@ -29,7 +29,6 @@ inline double RandomDouble(double min, double max) {return min + (max-min) * Ran
 //    return distribution(generator);
 //}
 
-
 //Common Header
 #include "Color.h"
 #include "Ray.h"

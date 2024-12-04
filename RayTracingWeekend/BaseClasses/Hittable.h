@@ -2,12 +2,14 @@
 #define HITTIBLE_H
 
 #include "RayTraceWeekendConstants.h"
+class Material;
 
 class HitRecord
 {
 public:
     Point3 point;
     Vector3 normal;
+    shared_ptr<Material> material;
     double t;
     bool isFrontFace = false;
 
