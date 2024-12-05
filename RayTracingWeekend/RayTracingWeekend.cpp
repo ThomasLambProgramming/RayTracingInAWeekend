@@ -13,7 +13,7 @@ int main()
     shared_ptr<Material> groundMaterial = make_shared<Lambertian>(Color(0.5,0.5,0.5));
     shared_ptr<Material> glass1 = make_shared<Dielectric>(1.5);
     shared_ptr<Material> lambert1 = make_shared<Lambertian>(Color(0.4,0.2,0.1));
-    shared_ptr<Material> metal1 = make_shared<Metal>(Color(0.7,0.6,0.5), 0.1);
+    shared_ptr<Material> metal1 = make_shared<Metal>(Color(0.7,0.6,0.5), 0.0);
 
     //Ground sphere that is enlarged to look like a surface.
     world.AddObject(make_shared<Sphere>(Point3(0,-1000,0), 1000, groundMaterial));
