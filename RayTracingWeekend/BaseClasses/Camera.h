@@ -12,6 +12,14 @@ public:
     int imageWidth  = 100;  // Rendered image width in pixel count
     int samplesPerPixel = 1;
     int maxLightBounces = 10;
+
+    Point3 lookFrom = Point3(0,0,0); //where camera is looking from
+    Point3 lookAt = Point3(0,0,0); //what the camera is looking at.
+    Vector3 cameraUp = Vector3(0,1,0); 
+    double vFov = 90; //Vertical field of view in degrees.
+    
+    double defocusAngle = 0; // ray angle variation through each pixel
+    double focusDistance = 10; //distance from camera look location to plane of perfect focus
     
     void Render(const Hittable& world)
     {
@@ -45,30 +53,45 @@ private:
     Vector3 pixel00Location;
     Vector3 pixelDeltaU;
     Vector3 pixelDeltaV;
+    Vector3 u,v,w; //camera frame basis vectors.
+
+    Vector3 defocusDiskU; //horiztonal radius of defocus disk
+    Vector3 defocusDiskV; //vertical radius of defocus disk
     
     void Initialize()
     {
         imageHeight = int(imageWidth / aspectRatio);
         imageHeight = (imageHeight < 1) ? 1 : imageHeight;
-        
-        double focalLength = 1.0;
-        double viewportHeight = 2.0;
-        double viewportWidth = viewportHeight * (double(imageWidth)/imageHeight);
 
-        pixelSamplesScale = 1.0 / samplesPerPixel;
+        cameraCenter = lookFrom;
         
+        double theta = DegreeToRadian(vFov);
+        double h = std::tan(theta/2);
+        double viewportHeight = 2.0 * h * focusDistance;
+        double viewportWidth = viewportHeight * (double(imageWidth)/imageHeight);
+        
+        pixelSamplesScale = 1.0 / samplesPerPixel;
+
+        w = UnitVector(lookFrom - lookAt);
+        u = UnitVector(CrossProduct(cameraUp, w));
+        v = CrossProduct(w, u);
+
         //Calculate the vectors across the horizontal and vertical viewport edges.
-        Vector3 viewportU = Vector3(viewportWidth,0,0);
-        Vector3 viewportV = Vector3(0,-viewportHeight,0);
+        Vector3 viewportU = viewportWidth * u;
+        Vector3 viewportV = viewportHeight * -v;
 
         //Calculate the amount to move in each direction for each pixel in the x and y coords
         pixelDeltaU = viewportU / imageWidth;
         pixelDeltaV = viewportV / imageHeight;
 
         //RHS coord system -z is forward so -z focal length (im 99% focal length is also the near plane for frustum), assuming cameracenter we want to move it half the screen left and up.
-        Vector3 viewportUpperLeft = cameraCenter - Vector3(0,0,focalLength) - viewportU / 2 - viewportV / 2;
+        Vector3 viewportUpperLeft = cameraCenter - (focusDistance * w) - viewportU / 2 - viewportV / 2;
         //We inset by half a pixel on either side so each pixel position is the middle of the pixel it is meant to ray from.
         pixel00Location = viewportUpperLeft + 0.5 * (pixelDeltaU + pixelDeltaV);
+
+        double defocusRadius = focusDistance * std::tan(DegreeToRadian(defocusAngle / 2));
+        defocusDiskU = u * defocusRadius;
+        defocusDiskV = v * defocusRadius;
     }
 
     Ray GetRay(int i, int j) const
@@ -79,7 +102,7 @@ private:
             ((i + offset.x()) * pixelDeltaU) + 
             ((j + offset.y()) * pixelDeltaV);
 
-        Vector3 rayOrigin = cameraCenter;
+        Vector3 rayOrigin = (defocusAngle <= 0) ? cameraCenter : DefocusDiscSample();
         Vector3 rayDirection = pixelSample - rayOrigin;
         return Ray(rayOrigin, rayDirection);
     }
@@ -110,6 +133,12 @@ private:
         double a = 0.5 * (direction.y() + 1.0);
         return (1.0 - a) * Color(1.0,1.0,1.0) + a * Color(0.5,0.7,1.0);
         //When logging direction.y is -0.7 -> 0.57 in range so a's range is 0.15->0.785
+    }
+
+    Point3 DefocusDiscSample() const
+    {
+        Vector3 point = RandomInsideUnitDisc();
+        return cameraCenter + (point[0] * defocusDiskU) + (point[1] * defocusDiskV);
     }
 };
 

@@ -139,4 +139,14 @@ inline Vector3 Refract(const Vector3& uv, const Vector3& n, double EtaiOverEtat)
     Vector3 rOutParallel = -std::sqrt(std::fabs(1.0 - rOutPerpendicular.SquaredLength())) * n;
     return rOutPerpendicular + rOutParallel;
 }
+
+inline Vector3 RandomInsideUnitDisc()
+{
+    while (true)
+    {
+        Vector3 p = Vector3(RandomDouble(-1,1), RandomDouble(-1,1), 0);
+        if (p.SquaredLength() < 1)
+            return p;
+    }
+}
 #endif
